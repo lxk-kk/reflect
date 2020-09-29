@@ -576,6 +576,12 @@
 
 + Spring 和 servlet 的区别，SpringMVC 和 servlet 的区别、tomcat 中如何实现多应用共存
 
+  [Servlet、Spring、SpringMVC](https://www.cnblogs.com/shawshawwan/p/9002126.html)
+
+  [Spring 优点](https://www.w3cschool.cn/fisug/fisug-qlg72g5j.html)
+
+  [tomcat 原理](https://juejin.im/post/6844903473482317837)
+
 + jdbc 中使用到了 策略模式吗？
 
 + 算法：两个栈实现一个队列
@@ -590,13 +596,35 @@
 
 + Spring 需要深挖一下，Spring 与 SpringBoot 区别，Spring 的优点
 
-+ ORM 框架，中 MyBatis 如何实现行级锁
++ ORM 框架，中 MyBatis 如何实现行级共享锁 **lock in share mode**
+
+  ```
+  select * from table_name lock in share mode;
+  ```
 
   Hibernate 有了解过嘛
 
   JDBC Template、Hibernate、MyBatis 各自的优缺点
 
 + 反射，反射慢在哪儿？
+
++ Redis 使用场景
+
+  + 主要运用在分布式的场景中
+
+  + 作为一个中间件：分布式锁、分布式缓存、分布式限流、分布式数据去重
+
+  + 拥有特定的数据结构：
+
+    简单的消息队列、权重队列（排行榜）、延时队列、一对多的发布订阅
+
+    bitmap 做大数据标记
+
+    计数器（线程安全）
+
++ 堆使用场景
+
+  ​
 
 
 
