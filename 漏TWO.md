@@ -1,6 +1,6 @@
 ##### 项目/开放
 
-+ ​
++ 
 
 + **项目相关，项目细节，遇到的困难，是如何解决的**
 
@@ -10,102 +10,16 @@
 
 + **实习经历**
 
-+ ​
++ 
 
 + 你自己的最大优势是什么，举个例子  
 
 + 编译原理课程做了什么 
 
-+ ​
++ 
 + 开放题： 要实现一个像[京东]()商城中的购物车，数据存储应该如何设计 
    追问 1： 对于游客账号，这些数据应该如何存储 
    追问 2： 如果数据量超过数据库承载能力，有什么方案
-
-##### Java
-
-+ **如何在C++中调用汇编代码** 
-+ Java基本变量类型 ， java中的基本变量类型，各占多少比特
-+ static 关键字的作用 
-+ final 关键字的作用，final 能修饰方法吗？（猜了个不能，答错了） 
-+ JDK7和8的区别 
-+ java反射讲一下  java序列化(这个我真的不会。。。)  
-+ ​
-+ Java数据结构 
-  +  常见的集合类
-  +  ArrayList和LinkedList讲一下
-  +  ArrayList 和 LinkedList 的原理和实现 
-  +  链表和数组的区别 
-
-- HashMap 的实现原理，如何通过Key获得Value 
-
-  - HashMap 和 HashTable 的区别和原理 
-
-  - 哈希冲突解决方法 
-
-  - HashMap原理 
-
-    链表转红黑树阈值，红黑树转链表阈值，为什么 
-
-  - **hashmap讲一下 resize做了啥** 
-
-    + 计算新的桶容量、计算新的阈值、使用新计算的 桶大小 创建一个新的 哈希表（数组）。
-
-    + 将 HashMap 中的哈希表指向新的哈希表。
-
-    + 遍历 旧哈希表 中的桶，分离旧桶中的 链表：原位置 链表，新位置 链表
-
-      将这两条链表存入 新表 中指定的位置。
-
-  - ConcurrentHashMap原理
-
-  - 看过源码吗？我说HashMap  
-
-  - **HashMap当在扩容时候进行put操作时，会怎么办呢？**  
-
-    - put 的时候不会做任何的安全措施，直接
-    - *（没问尽量不要说，你没看过 辅助扩容的源码）ConcurrentHashMap 在 putVal 的时候，如果正在 resize 就会辅助扩容。*
-
-- lock 和 synchronized区别  
-
-  + sychronized 静态方法和不同方法的区别 
-
-  + Lock锁，synchronized,volatile
-
-  + 什么时候使用 synchronized，[内部实现](https://www.pianshen.com/article/8275204637/)是怎么样的？
-
-    + synchronized 加锁的目标是 Java 对象，对类加锁也借助 Java 对象实现的，加锁对象为 Class 实例。
-
-    + synchronized 对象锁，在 JVM 层面是通过 对象的 monitor 实现。
-
-      monitorenter：加锁
-
-      monitorexit：释放锁
-
-      每一个对象都有一个 monitor 与之相关联，当线程执行到 monitorenter 时，会尝试获取锁，将 monitor 的 owner 设置尝试获取锁的线程。并且 monitor 中的 锁记数器 count 会执行 +1 操作
-
-
-  + lock和synchronized区别  
-
-  + Synchronized与ReentrantLock区别 
-
-  + Synchronized锁方法和锁代码段的实现，主要是对象头（markword）与monitor_enter讲一下
-
-  + Synchronized会响应中断么 
-
-- 多线程
-
-  - 进程和线程的区别，为什么不使用多进程而是多线程
-  - 线程状态 主线程能拿到子线程的执行结果和异常吗 
-  - **线程安全，如何解决多线程下数据不安全的情况 ，线程安全在JVM中的体现 ** 
-  - 自旋锁和互斥锁区别 
-  - Java中的乐观锁，CAS及其缺点 
-  - Java中创建线程的方法 
-  - Java中锁的种类 
-  - ThreadLocal 
-    + ThreadLocal怎么用的？内存泄漏，弱引用问题，垃圾回收（本来想把面试官引过来，没得逞）  
-    + 内存泄漏 内存溢出  
-  - 线程池参数 
-  - 若线程池中2个线程，执行完毕，现有新任务会怎样 
 
 ##### JVM
 
@@ -517,7 +431,7 @@
     */
     ```
 
-    ​
+    
 
 + Spring 事务传递，如何验证当前使用的哪种传递
 
@@ -574,6 +488,59 @@
 
          当前不存在事务：已非事务的方式执行。
 
++ Servlet
+
+  Servlet 是 运行在 Java 服务端上的程序，作为 Http 客户端 与 服务端应用程序或者数据库 的中间层，接收 Http 客户端请求，处理请求之后做相应的响应。即：交互式地浏览和生成数据，生成动态 Web 内容。
+
+  + Servlet 接口
+
+    ![](image/Servlet 接口.jpg)
+
+    + getServletConfig()
+
+      获取 Servlet 的配置信息，例如从 servlet.xml 配置文件中读取配置的相关信息，返回 ServletConfig 实例
+
+      ```xml
+      <servlet>
+          <servlet-name>LoginServlet</servlet-name> <!-- 3 -->
+          <servlet-class>demo.servlet.LoginServlet</servlet-class> <!-- 4 -->
+      </servlet>
+      <servlet-mapping>
+          <servlet-name>LoginServlet</servlet-name> <!-- 2 -->
+          <url-pattern>login</url-pattern> <!-- 1 -->
+      </servlet-mapping>
+      
+      <!-- 
+      Servlet 接收请求，并匹配到对应的 Servlet 处理程序过程：
+      1. 根据 servlet-mapping 标签中的 url-pattern 标签匹配到配置的 servlet-name
+      2. 根据 servlet-name 到 servlet 标签中匹配对应的 servlet-class
+      -->
+      ```
+
+    + init(ServletConfig)
+
+      通过 servlet 的配置信息，初始化 servlet 实例。
+
+    + service(ServletRequest, ServletResponse)
+
+       服务处理程序。该方法有两个参数：ServletRequest、ServletResponse 分别封装了 http 的 请求与响应。
+
+      ```
+      将请求匹配到对应的 servlet 处理类后，若该 servlet 已存在，否则需要先 init 并创建 servlet 实例，然后调用 service 处理请求。
+      ```
+
+    + destroy()
+
+      servlet 无用之后，将会调用 destroy 销毁，释放资源。
+
+  + [Servlet 请求与响应](https://www.cnblogs.com/liushiqiang123/p/11053802.html) | [Servlet 介绍](https://www.runoob.com/servlet/servlet-intro.html)
+
+  + Servlet 能够接收 http请求，**但 Servlet 并不能直接监听服务端端口，直接监听端口的是服务端“容器”，例如 tomcat。**
+
+    tomcat 会根据 url 信息，将请求交给对应的 servlet 处理。
+
+    **？？？？？？service 方法没有返回值，服务端如何知道请求处理完成需要响应的呢？？？？？？**
+
 + Spring 和 servlet 的区别，SpringMVC 和 servlet 的区别、tomcat 中如何实现多应用共存
 
   [Servlet、Spring、SpringMVC](https://www.cnblogs.com/shawshawwan/p/9002126.html)
@@ -624,7 +591,7 @@
 
 + 堆使用场景
 
-  ​
+  
 
 
 
