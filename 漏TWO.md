@@ -492,6 +492,8 @@
 
   Servlet 是 运行在 Java 服务端上的程序，作为 Http 客户端 与 服务端应用程序或者数据库 的中间层，接收 Http 客户端请求，处理请求之后做相应的响应。即：交互式地浏览和生成数据，生成动态 Web 内容。
 
+  + [Servlet 详解_源码解析](https://mp.weixin.qq.com/s/F_3ZpRfH5YQX54aFMTcZ1g) | [Servlet 请求与响应](https://www.cnblogs.com/liushiqiang123/p/11053802.html) | [Servlet 介绍](https://www.runoob.com/servlet/servlet-intro.html)
+
   + Servlet 接口
 
     ![](image/Servlet 接口.jpg)
@@ -519,43 +521,159 @@
 
     + init(ServletConfig)
 
-      通过 servlet 的配置信息，初始化 servlet 实例。
+      + 通过 servlet 的配置信息，初始化 servlet 实例。
+
+      + Servlet 能够接收 http请求，**但 Servlet 并不能直接监听服务端端口，直接监听端口的是服务端“容器”，例如 tomcat。**tomcat 会根据 url 信息，将请求交给对应的 servlet 处理。
+
+        tomcat 启动时，会根据 web.xml 中配置的 load-on-startup 参数决定 servlet 的加载时机。
+
+        + load-on-startup = 0（默认）：第一次请求到该 servlet 时，加载 servlet，执行 init 方法
+        + load-on-startup = 1 ：tomcat 容器启动时加载 servlet，执行 init 方法
 
     + service(ServletRequest, ServletResponse)
 
-       服务处理程序。该方法有两个参数：ServletRequest、ServletResponse 分别封装了 http 的 请求与响应。
+      + 将请求匹配到对应的 servlet 处理类后，执行调用 service 方法处理请求。
 
-      ```
-      将请求匹配到对应的 servlet 处理类后，若该 servlet 已存在，否则需要先 init 并创建 servlet 实例，然后调用 service 处理请求。
-      ```
+      + 参数：
+
+        ServletRequest ：Tomcat 解析 http 请求报文，封装成 HttpServletRequest 实例，作为请求信息传入 Servlet 处理。
+
+        ServletResponse ：Tomcat 根据 HttpServletResponse 内容，生成响应报文，返回给浏览器。
+
+      + 并发环境下，service 方法的线程安全问题
+
+        若 service 方法没有访问 Servlet 的成员变量，静态资源，文件，数据库连接 等，只是用了当前线程自己的资源，则该方法本身就是线程安全的。
+
+        ![](image/servlet 并发访问.png)
+
+      + 示例：
+
+        ```java
+        // 重写了 doGet doPost 方法，service 会根据 请求的方式将请求转发到指定的方法上
+        // 多数情况下都是 get、post 请求
+        public class LoginServlet extends HttpServlet implements Servlet {
+            @Override
+            protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                throws ServletException, IOException {
+                
+                doPost(request, response);
+            }
+        
+            @Override
+            protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+                throws ServletException, IOException {
+                
+                String result = "";
+                // 获取用户名  
+                String userName = request.getParameter("userName");
+                // 获取密码  
+                String passwd = request.getParameter("password");
+                // 数据中查找此人
+                UserDao.SelectForLogin(userName, password); 
+                request.getSession().setAttribute("userName", userName);
+                // 设置返回页面
+                response.sendRedirect("login_success.jsp");     
+            }
+        }
+        ```
 
     + destroy()
 
-      servlet 无用之后，将会调用 destroy 销毁，释放资源。
+      服务端关闭之后，调用 destroy 卸载所有的 servlet。
 
-  + [Servlet 请求与响应](https://www.cnblogs.com/liushiqiang123/p/11053802.html) | [Servlet 介绍](https://www.runoob.com/servlet/servlet-intro.html)
+  + 容器中 Servlet 执行过程
 
-  + Servlet 能够接收 http请求，**但 Servlet 并不能直接监听服务端端口，直接监听端口的是服务端“容器”，例如 tomcat。**
+    ![](image/servlet 执行过程.jpg)
 
-    tomcat 会根据 url 信息，将请求交给对应的 servlet 处理。
+  + Servlet 缺点：**url 与 类 对接**
 
-    **？？？？？？service 方法没有返回值，服务端如何知道请求处理完成需要响应的呢？？？？？？**
+    ```
+    每一个接口都有对应的 Servlet 处理类，都需要在 servlet.xml 中进行配置。
+    导致：
+    1. Servlet 实现类繁多，系统复杂度增大
+    2. servlet.xml 配置过于庞大，难以维护
+    ```
 
-+ Spring 和 servlet 的区别，SpringMVC 和 servlet 的区别、tomcat 中如何实现多应用共存
++ Spring MVC
 
-  [Servlet、Spring、SpringMVC](https://www.cnblogs.com/shawshawwan/p/9002126.html)
+  Spring MVC 是基于 MVC 模式实现 Web 框架（轻量级）。
 
-  [Spring 优点](https://www.w3cschool.cn/fisug/fisug-qlg72g5j.html)
+  SpringMVC 是 Servlet 的上层封装，通过一个 DispatcherServlet 的调度，实现 **url 与 方法 的对接**。
 
-  [tomcat 原理](https://juejin.im/post/6844903473482317837)
+  <img src="image/SpringMVC 执行原理.jpeg" style="zoom:67%;" />
+
+  + **SpringMVC vs Servlet（我的理解）**
+
+    > 1. SpringMVC 只需要在 servlet.xml 中配置一个 DispatcherServlet，所有的请求都能够通过该 servlet 找到对应的处理程序。
+    > 2. 由于 DispatcherServlet 的调度，请求的处理程序不再需要实现 Servlet 接口，@Controller 注解标注的普通类便能接收请求并处理。
+    > 3. 请求的处理程序，从类级别，变成了方法级别。
+
++ Tomcat 整体架构
+
+
+  + [Tomcat 系统架构及请求执行过程](https://blog.csdn.net/qq_38245537/article/details/79009448) | [Tomcat 整体架构](https://mp.weixin.qq.com/s/zxdwg0qwYQNzIwyF1UzLHg) | [Tomcat 处理连接](https://mp.weixin.qq.com/s/zxdwg0qwYQNzIwyF1UzLHg) | [Tomcat 组成与工作原理](https://juejin.im/post/6844903473482317837)
+
+  + tomcat 是一个 Java Web 服务器（轻量级），能够接收请求并做相应的响应，本质上 tomcat 就是 servlet 容器。
+
+    tomcat 可以处理静态资源的请求，可以通过 servlet 处理动态资源的请求。tomcat 接收动态请求，通过 url 定位到具体的 servlet 处理类，响应处理结果。
+
+    + 前后端未分离：
+
+      响应的是 jsp 页面：tomcat 会通过 jasper 组件将 jsp 翻译成 java 代码（servlet），编译成 class 后运行，最后转换成 html 格式响应给浏览器。
+
+      ```
+      jsp：在 html 中通过 <% %> 标签扩展 Java 代码的页面格式，文件格式为 ".jsp" ，需要通过 web 服务器翻译成 servlet 类，运行之后，生成 html 格式的字节流响应给浏览器。
+      ```
+
+    + 前后端分离：响应的是 servlet 处理后的数据。
+
+  + tomcat 顶层结构
+
+    <img src="image/tomcat 顶层结构.jpg" style="zoom:80%;" />
+
+    + **Server**：代表整个 tomcat 服务，掌握 tomcat 的生杀大权；*一个 tomcat 只能有一个 Server*
+
+    + **Service**：用于提供具体的服务；*一个 Server 下支持多个 Service 共存，表示同时对外提供多个服务*
+
+    + tomcat 两大核心组件：Connector + Container
+
+      **Connector**：连接器；处理连接相关的任务，并提供 Socket 与 Http Resquest、Response 之间的转换；*一个 Service 支持多个 Connector，表示一个服务可以被并发访问。*例如：不同协议的连接、相同协议不同端口的连接、同协议同端口不同域名的连接、不同 url path 的连接。
+
+      ![](image/tomcat service 并发访问.jpg)
+
+      **Container** ：Servlet 容器，用于封装和管理 Servlet 并处理具体的 Http Request。*一个  Service 只能有一个 Container*
+
+  + tomcat —— Connector 组件
+
+    <img src="image/tomcat connector 组件.jpg" style="zoom:67%;" />
+
+    + Connector 需要同时支持 Socket 与 HTTP 协议；Socket 与 客户端进行通信；HTTP 与服务端处理程序进行通信。
+      + 接收 Socket 请求，解析成 HTTP Request、Response 实例，传递给 Container 处理
+      + 接收 Container 处理结果，通过 Socket 响应客户端。
+    + **ProtocolHandler** ：Connector **通过 ProtocolHandler 处理请求，不同的 ProtocolHandler 代表不同的连接类型**。例如：Http11Protocol 使用普通的 Socket 连接，Http11NioProtocol 使用 NioSocket 连接。
+      + **Endpoint**：处理底层 Socket 连接
+      + **Processor**：将 Endpoint 接收到的 Socket 封装成 Request
+      + **Adapter**：将 Request 适配到 Container 进行处理
+
+  + tomcat —— Container 组件
+
+    <img src="image/tomcat container 组件.jpg" style="zoom:40%;" />
+
+    + Engine 引擎：用于管理多个站点；一个 Service 只能有一个 Engine
+
+    + Host：虚拟主机，代表一个站点，课通过配置 Host 添加站点，一个 Engine 支持多个 Host 共存。
+
+    + Context：应用上下文，代表一个 应用程序；webapps 目录下的每个文件都是 context，其中 ROOT 是主应用，通过 Host 指定的域名即可访问
+
+      <img src = "image/tomcat container webapps 目录.jpg" style = "zoom:100%">
+
+    + Wrapper：封装 Servlet，每个 Wrapper 都封装着一个 Servlet
 
 + jdbc 中使用到了 策略模式吗？
 
 + 算法：两个栈实现一个队列
 
 + dubbo 中的监控中心使用的是哪个组件？
-
-
 
 + 多码代码：细心
 
@@ -575,19 +693,21 @@
 
 + 反射，反射慢在哪儿？
 
-+ Redis 使用场景
++ **Redis 使用场景**
 
-  + 主要运用在分布式的场景中
+  > + 主要运用在分布式的场景中
+>
+  > + 作为一个中间件：分布式锁、分布式缓存、分布式限流、分布式数据去重
+>
+  > + 拥有特定的数据结构：
+>
+  >   简单的消息队列、权重队列（排行榜）、延时队列、一对多的发布订阅
+>
+  >   bitmap 做大数据标记
+>
+  >   计数器（线程安全）
 
-  + 作为一个中间件：分布式锁、分布式缓存、分布式限流、分布式数据去重
-
-  + 拥有特定的数据结构：
-
-    简单的消息队列、权重队列（排行榜）、延时队列、一对多的发布订阅
-
-    bitmap 做大数据标记
-
-    计数器（线程安全）
++ **GC 频繁应该如何排查**
 
 + 堆使用场景
 
@@ -609,41 +729,3 @@
 - [黑客抓包原理](http://www.jeepxie.net/article/75737.html)
 - [网络安全之数据监听](https://www.jianshu.com/p/14c9a4294c31)
 - [WEB 安全之 CSRF](https://www.jianshu.com/p/855395f9603b)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
